@@ -1,579 +1,919 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ship Assignment Tool</title>
-    <link rel="icon" type="image/png" href="favicon.png">
-    <!-- Load Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Load Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Mohave:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Configure Tailwind to use custom fonts and colors -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        'sans': ['Inter', 'sans-serif'],
-                        'mohave': ['Mohave', 'sans-serif'],
-                    },
-                    colors: {
-                        // Custom colors from user request
-                        'mrs-bg': '#1f2937',
-                        'mrs-box': '#1d2735',
-                        'mrs-button': '#2b4e71',
-                        'mrs-button-hover': '#254666', // A slightly darker hover
-                        primary: tailwind.colors.blue,
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Ship Assignment Tool</title>
+        <link rel="icon" type="image/png" href="favicon.png" />
+        <!-- Load Tailwind CSS -->
+        <script src="https://cdn.tailwindcss.com"></script>
+
+        <!-- Load Google Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Mohave:wght@400;500;600;700&display=swap"
+            rel="stylesheet"
+        />
+
+        <!-- Configure Tailwind to use custom fonts and colors -->
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            sans: ["Inter", "sans-serif"],
+                            mohave: ["Mohave", "sans-serif"]
+                        },
+                        colors: {
+                            // Custom colors from user request
+                            "mrs-bg": "#1f2937",
+                            "mrs-box": "#1d2735",
+                            "mrs-button": "#2b4e71",
+                            "mrs-button-hover": "#254666", // A slightly darker hover
+                            primary: tailwind.colors.blue
+                        }
                     }
                 }
-            }
-        }
-    </script>
+            };
+        </script>
 
-    <link rel="stylesheet" href="css/styles.css">
-</head>
-<body class="min-h-screen bg-mrs-bg p-0 font-sans text-gray-200">
-    
-    <!-- Header Bar -->
-    <div class="w-full bg-mrs-box border-b border-gray-700 p-4 shadow-lg">
-        <div class="mx-auto max-w-7xl">
-            <h1 class="flex items-center gap-4 text-left font-mohave text-2xl font-semibold uppercase tracking-wide text-white">
-                <img src="https://staff.medrunner.space/images/medrunner-logo-stable-white.svg" alt="Medrunner Logo" class="h-12 w-auto">
-                <span>Medrunner Operations Tool</span>
-            </h1>
-        </div>
-    </div>
-
-    <!-- Tab Navigation -->
-    <div class="w-full bg-mrs-box border-b border-gray-700">
-        <div class="mx-auto max-w-7xl px-4">
-            <div class="flex gap-2">
-                <button onclick="switchTab('shipAssignment')" id="tab-shipAssignment" class="tab-button active border-b-2 border-mrs-button px-6 py-3 font-mohave text-sm font-semibold uppercase tracking-wide text-white transition hover:bg-gray-700">
-                    Ship Assignment
-                </button>
-                <button onclick="switchTab('aar')" id="tab-aar" class="tab-button border-b-2 border-transparent px-6 py-3 font-mohave text-sm font-semibold uppercase tracking-wide text-gray-400 transition hover:bg-gray-700 hover:text-white">
-                    After Action Report
-                </button>
-                <button onclick="switchTab('tipSplitter')" id="tab-tipSplitter" class="tab-button border-b-2 border-transparent px-6 py-3 font-mohave text-sm font-semibold uppercase tracking-wide text-gray-400 transition hover:bg-gray-700 hover:text-white">
-                    Tip Splitter
-                </button>
+        <link rel="stylesheet" href="css/styles.css" />
+    </head>
+    <body class="min-h-screen bg-mrs-bg p-0 font-sans text-gray-200">
+        <!-- Header Bar -->
+        <div class="w-full bg-mrs-box border-b border-gray-700 p-4 shadow-lg">
+            <div class="mx-auto max-w-7xl">
+                <h1 class="flex items-center gap-4 text-left font-mohave text-2xl font-semibold uppercase tracking-wide text-white">
+                    <img
+                        src="https://staff.medrunner.space/images/medrunner-logo-stable-white.svg"
+                        alt="Medrunner Logo"
+                        class="h-12 w-auto"
+                    />
+                    <span>Medrunner Operations Tool</span>
+                </h1>
             </div>
         </div>
-    </div>
 
-    <!-- Main Content -->
-    <div class="mx-auto max-w-7xl p-4 md:p-8">
-
-        <!-- SHIP ASSIGNMENT TAB -->
-        <div id="content-shipAssignment" class="tab-content">
-
-        <!-- Import from Discord Card -->
-        <div class="mb-6 rounded-lg border border-gray-700 bg-mrs-box p-5 shadow-lg md:p-6">
-            <h2 class="mb-4 font-mohave text-2xl font-semibold uppercase tracking-wide text-white">Import from Discord</h2>
-            <p class="mb-4 rounded-lg border border-blue-900 bg-blue-950/50 p-3 text-sm text-gray-300">
-                💡 <strong class="text-white">Paste a Discord ship assignment message</strong> below to automatically populate the ship assignments. This is useful for team lead hand-overs.
-            </p>
-            <textarea id="import-discord-message" rows="8" placeholder="Paste your Discord ship assignment message here..." class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 font-mono transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"></textarea>
-            <div class="mt-3 flex gap-3">
-                <button onclick="importFromDiscord()" class="flex-1 rounded-lg border border-mrs-button bg-mrs-button px-5 py-2.5 text-sm font-medium text-white shadow-md transition hover:border-mrs-button-hover hover:bg-mrs-button-hover">Import & Populate</button>
-                <button onclick="document.getElementById('import-discord-message').value = ''" class="rounded-lg border border-gray-600 bg-gray-700 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-gray-600">Clear</button>
-            </div>
-            <div id="import-status" class="mt-3 hidden rounded-lg px-4 py-3 text-center font-medium"></div>
-        </div>
-
-        <!-- Ship Groups Card -->
-        <div class="mb-6 rounded-lg border border-gray-700 bg-mrs-box p-5 shadow-lg md:p-6">
-            <div class="mb-4 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
-                <h2 class="font-mohave text-2xl font-semibold uppercase tracking-wide text-white">Ship Groups</h2>
-                <div class="flex w-full items-center gap-3 md:w-auto">
-                    <span id="apiStatus" class="flex-1 rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-xs font-medium text-gray-300 md:flex-auto">Loading ships...</span>
-                    <button class="rounded-lg border border-mrs-button bg-mrs-button px-4 py-2 text-sm font-medium text-white transition hover:border-mrs-button-hover hover:bg-mrs-button-hover" onclick="refreshShipList()">Refresh Ships</button>
-                </div>
-            </div>
-            <p class="mb-5 rounded-lg border border-blue-900 bg-blue-950/50 p-3 text-sm text-gray-300">
-                💡 <strong class="text-white">Position numbers (1-9)</strong> are optional and help the Team Lead track who has been in the team longest. Multiple people can have the same number. Drag crew members to reorder or move between ships.
-            </p>
-            <div id="shipList" class="mb-5 flex flex-col gap-4"></div>
-            <button class="rounded-lg border border-mrs-button bg-mrs-button px-5 py-2.5 text-sm font-medium text-white shadow-md transition hover:border-mrs-button-hover hover:bg-mrs-button-hover" onclick="addShip()">+ Add Ship Group</button>
-        </div>
-
-        <!-- Preview Card -->
-        <div class="rounded-lg border border-gray-700 bg-mrs-box p-5 shadow-lg md:p-6">
-            <h2 class="mb-4 font-mohave text-2xl font-semibold uppercase tracking-wide text-white">Preview</h2>
-            <div id="preview" class="max-h-96 min-h-[100px] overflow-y-auto rounded-lg border border-gray-700 bg-gray-900 p-4 font-mono text-sm text-gray-300 whitespace-pre-wrap md:p-6">Add ships and crew members to see preview...</div>
-            <button class="mt-5 w-full rounded-lg border border-mrs-button bg-mrs-button px-8 py-4 text-lg font-semibold text-white shadow-lg transition hover:border-mrs-button-hover hover:bg-mrs-button-hover" onclick="copyToClipboard()">COPY TO CLIPBOARD</button>
-            <!-- Success Message -->
-            <div id="successMessage" class="hidden">
-                <div class="mt-3 rounded-lg bg-green-600 px-4 py-3 text-center font-medium text-white">
-                    ✅ Copied to clipboard!
+        <!-- Tab Navigation -->
+        <div class="w-full bg-mrs-box border-b border-gray-700">
+            <div class="mx-auto max-w-7xl px-4">
+                <div class="flex gap-2">
+                    <button
+                        onclick="switchTab('shipAssignment')"
+                        id="tab-shipAssignment"
+                        class="tab-button active border-b-2 border-mrs-button px-6 py-3 font-mohave text-sm font-semibold uppercase tracking-wide text-white transition hover:bg-gray-700"
+                    >
+                        Ship Assignment
+                    </button>
+                    <button
+                        onclick="switchTab('aar')"
+                        id="tab-aar"
+                        class="tab-button border-b-2 border-transparent px-6 py-3 font-mohave text-sm font-semibold uppercase tracking-wide text-gray-400 transition hover:bg-gray-700 hover:text-white"
+                    >
+                        After Action Report
+                    </button>
+                    <button
+                        onclick="switchTab('tipSplitter')"
+                        id="tab-tipSplitter"
+                        class="tab-button border-b-2 border-transparent px-6 py-3 font-mohave text-sm font-semibold uppercase tracking-wide text-gray-400 transition hover:bg-gray-700 hover:text-white"
+                    >
+                        Tip Splitter
+                    </button>
                 </div>
             </div>
         </div>
-        </div>
-        <!-- END SHIP ASSIGNMENT TAB -->
 
-        <!-- AAR TAB -->
-        <div id="content-aar" class="tab-content hidden">
-            <div class="mb-6 rounded-lg border border-gray-700 bg-mrs-box p-5 shadow-lg md:p-6">
-                <h2 class="mb-4 font-mohave text-2xl font-semibold uppercase tracking-wide text-white">After Action Report</h2>
-
-                <!-- SHIPS USED Section -->
-                <div class="mb-6">
-                    <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Ships Used</h3>
-                    <div class="grid gap-4 md:grid-cols-2">
-                        <!-- Gunship -->
-                        <div>
-                            <label class="mb-2 block text-sm font-medium text-gray-300">Gunship</label>
-                            <div class="custom-select-wrapper relative" id="aar-gunship-select">
-                                <div class="custom-select-trigger relative flex w-full cursor-pointer items-center justify-between rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition hover:border-primary-500">
-                                    <span class="custom-select-value truncate pr-4" id="aar-gunship-value">Select ship...</span>
-                                    <svg class="custom-select-arrow absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                    </svg>
-                                </div>
-                                <div class="custom-select-dropdown absolute left-0 right-0 top-full z-50 mt-1 hidden overflow-hidden rounded-md border border-gray-600 bg-gray-700 shadow-lg">
-                                    <div class="border-b border-gray-600 bg-gray-800 p-2">
-                                        <input type="text" placeholder="Search ships..." class="aar-ship-search-input w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-1.5 text-sm text-gray-200 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                                    </div>
-                                    <div class="custom-select-options custom-scrollbar max-h-60 overflow-y-auto" id="aar-gunship-options"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Medical -->
-                        <div>
-                            <label class="mb-2 block text-sm font-medium text-gray-300">Medical</label>
-                            <div class="custom-select-wrapper relative" id="aar-medical-select">
-                                <div class="custom-select-trigger relative flex w-full cursor-pointer items-center justify-between rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition hover:border-primary-500">
-                                    <span class="custom-select-value truncate pr-4" id="aar-medical-value">Select ship...</span>
-                                    <svg class="custom-select-arrow absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                    </svg>
-                                </div>
-                                <div class="custom-select-dropdown absolute left-0 right-0 top-full z-50 mt-1 hidden overflow-hidden rounded-md border border-gray-600 bg-gray-700 shadow-lg">
-                                    <div class="border-b border-gray-600 bg-gray-800 p-2">
-                                        <input type="text" placeholder="Search ships..." class="aar-ship-search-input w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-1.5 text-sm text-gray-200 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                                    </div>
-                                    <div class="custom-select-options custom-scrollbar max-h-60 overflow-y-auto" id="aar-medical-options"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- CAP -->
-                        <div>
-                            <label class="mb-2 block text-sm font-medium text-gray-300">CAP Ships <span class="text-xs text-gray-400">(comma-separated if multiple)</span></label>
-                            <input type="text" id="aar-cap-ships" placeholder="e.g., Anvil Hornet, Aegis Sabre" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                        </div>
-
-                        <!-- Additional Ships -->
-                        <div>
-                            <label class="mb-2 block text-sm font-medium text-gray-300">Additional Ships</label>
-                            <input type="text" id="aar-additional-ships" placeholder="List additional ships..." class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                        </div>
+        <!-- Main Content -->
+        <div class="mx-auto max-w-7xl p-4 md:p-8">
+            <!-- SHIP ASSIGNMENT TAB -->
+            <div id="content-shipAssignment" class="tab-content">
+                <!-- Import from Discord Card -->
+                <div class="mb-6 rounded-lg border border-gray-700 bg-mrs-box p-5 shadow-lg md:p-6">
+                    <h2 class="mb-4 font-mohave text-2xl font-semibold uppercase tracking-wide text-white">Import from Discord</h2>
+                    <p class="mb-4 rounded-lg border border-blue-900 bg-blue-950/50 p-3 text-sm text-gray-300">
+                        💡 <strong class="text-white">Paste a Discord ship assignment message</strong> below to automatically populate the
+                        ship assignments. This is useful for team lead hand-overs.
+                    </p>
+                    <textarea
+                        id="import-discord-message"
+                        rows="8"
+                        placeholder="Paste your Discord ship assignment message here..."
+                        class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 font-mono transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                    ></textarea>
+                    <div class="mt-3 flex gap-3">
+                        <button
+                            onclick="importFromDiscord()"
+                            class="flex-1 rounded-lg border border-mrs-button bg-mrs-button px-5 py-2.5 text-sm font-medium text-white shadow-md transition hover:border-mrs-button-hover hover:bg-mrs-button-hover"
+                        >
+                            Import & Populate
+                        </button>
+                        <button
+                            onclick="document.getElementById('import-discord-message').value = ''"
+                            class="rounded-lg border border-gray-600 bg-gray-700 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-gray-600"
+                        >
+                            Clear
+                        </button>
                     </div>
-
-                    <!-- Reason -->
-                    <div class="mt-4">
-                        <label class="mb-2 block text-sm font-medium text-gray-300">Reason</label>
-                        <input type="text" id="aar-reason" placeholder="e.g., Effectiveness, Required for Situation, Availability..." class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                    </div>
+                    <div id="import-status" class="mt-3 hidden rounded-lg px-4 py-3 text-center font-medium"></div>
                 </div>
 
-                <!-- INTERSYSTEM RESPONSE Section -->
-                <div class="mb-6">
-                    <label class="mb-2 flex items-center text-sm font-medium text-gray-400">
-                        <input type="checkbox" id="aar-intersystem-toggle" class="mr-2 h-4 w-4 rounded border-gray-600 bg-gray-700 text-mrs-button focus:ring-2 focus:ring-mrs-button">
-                        Intersystem Response
-                    </label>
+                <!-- Ship Groups Card -->
+                <div class="mb-6 rounded-lg border border-gray-700 bg-mrs-box p-5 shadow-lg md:p-6">
+                    <div class="mb-4 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+                        <h2 class="font-mohave text-2xl font-semibold uppercase tracking-wide text-white">Ship Groups</h2>
+                        <div class="flex w-full items-center gap-3 md:w-auto">
+                            <span
+                                id="apiStatus"
+                                class="flex-1 rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-xs font-medium text-gray-300 md:flex-auto"
+                                >Loading ships...</span
+                            >
+                            <button
+                                class="rounded-lg border border-mrs-button bg-mrs-button px-4 py-2 text-sm font-medium text-white transition hover:border-mrs-button-hover hover:bg-mrs-button-hover"
+                                onclick="refreshShipList()"
+                            >
+                                Refresh Ships
+                            </button>
+                        </div>
+                    </div>
+                    <p class="mb-5 rounded-lg border border-blue-900 bg-blue-950/50 p-3 text-sm text-gray-300">
+                        💡 <strong class="text-white">Position numbers (1-9)</strong> are optional and help the Team Lead track who has been
+                        in the team longest. Multiple people can have the same number. Drag crew members to reorder or move between ships.
+                    </p>
+                    <div id="shipList" class="mb-5 flex flex-col gap-4"></div>
+                    <button
+                        class="rounded-lg border border-mrs-button bg-mrs-button px-5 py-2.5 text-sm font-medium text-white shadow-md transition hover:border-mrs-button-hover hover:bg-mrs-button-hover"
+                        onclick="addShip()"
+                    >
+                        + Add Ship Group
+                    </button>
                 </div>
 
-                <!-- LOCATION Section -->
-                <div class="mb-6">
-                    <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Location</h3>
-                    <div class="grid gap-4 md:grid-cols-2">
-                        <!-- Planetary Body -->
-                        <div>
-                            <label class="mb-2 block text-sm font-medium text-gray-300">Planetary Body</label>
-                            <div class="custom-select-wrapper relative" id="aar-planet-select">
-                                <div class="custom-select-trigger relative flex w-full cursor-pointer items-center justify-between rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition hover:border-primary-500">
-                                    <span class="custom-select-value truncate pr-4" id="aar-planet-value">Select planetary body...</span>
-                                    <svg class="custom-select-arrow absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                    </svg>
-                                </div>
-                                <div class="custom-select-dropdown absolute left-0 right-0 top-full z-50 mt-1 hidden overflow-hidden rounded-md border border-gray-600 bg-gray-700 shadow-lg">
-                                    <div class="border-b border-gray-600 bg-gray-800 p-2">
-                                        <input type="text" placeholder="Search locations..." class="planet-search-input w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-1.5 text-sm text-gray-200 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                                    </div>
-                                    <div class="custom-select-options custom-scrollbar max-h-60 overflow-y-auto" id="aar-planet-options"></div>
-                                </div>
-                            </div>
-                        </div>
+                <!-- Preview Card -->
+                <div class="rounded-lg border border-gray-700 bg-mrs-box p-5 shadow-lg md:p-6">
+                    <h2 class="mb-4 font-mohave text-2xl font-semibold uppercase tracking-wide text-white">Preview</h2>
+                    <div
+                        id="preview"
+                        class="max-h-96 min-h-[100px] overflow-y-auto rounded-lg border border-gray-700 bg-gray-900 p-4 font-mono text-sm text-gray-300 whitespace-pre-wrap md:p-6"
+                    >
+                        Add ships and crew members to see preview...
+                    </div>
+                    <button
+                        class="mt-5 w-full rounded-lg border border-mrs-button bg-mrs-button px-8 py-4 text-lg font-semibold text-white shadow-lg transition hover:border-mrs-button-hover hover:bg-mrs-button-hover"
+                        onclick="copyToClipboard()"
+                    >
+                        COPY TO CLIPBOARD
+                    </button>
+                    <!-- Success Message -->
+                    <div id="successMessage" class="hidden">
+                        <div class="mt-3 rounded-lg bg-green-600 px-4 py-3 text-center font-medium text-white">✅ Copied to clipboard!</div>
+                    </div>
+                </div>
+            </div>
+            <!-- END SHIP ASSIGNMENT TAB -->
 
-                        <!-- Location Type -->
-                        <div>
-                            <label class="mb-2 block text-sm font-medium text-gray-300">Location Type</label>
-                            <select id="aar-location-type" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                                <option value="">Select type...</option>
-                                <option value="Landing Zone / City">Landing Zone / City</option>
-                                <option value="Settlement">Settlement</option>
-                                <option value="Outpost">Outpost</option>
-                                <option value="Space Station">Space Station</option>
-                                <option value="Lagrange Station">Lagrange Station</option>
-                                <option value="Jump Point Station">Jump Point Station</option>
-                                <option value="Bunker (Corporate)">Bunker (Corporate)</option>
-                                <option value="Bunker (Outlaw)">Bunker (Outlaw)</option>
-                                <option value="Bunker (Abandoned)">Bunker (Abandoned)</option>
-                                <option value="Security Post">Security Post</option>
-                                <option value="Mining Facility">Mining Facility</option>
-                                <option value="Processing Facility">Processing Facility</option>
-                                <option value="Distribution Center">Distribution Center</option>
-                                <option value="Data Center">Data Center</option>
-                                <option value="Research Outpost">Research Outpost</option>
-                                <option value="Agricultural / Farm">Agricultural / Farm</option>
-                                <option value="Aid Shelter">Aid Shelter</option>
-                                <option value="Salvage Yard">Salvage Yard</option>
-                                <option value="Cave System">Cave System</option>
-                                <option value="Derelict / Wreck">Derelict / Wreck</option>
-                                <option value="Communication Array">Communication Array</option>
-                                <option value="Prison / Rehabilitation">Prison / Rehabilitation</option>
-                                <option value="Racetrack">Racetrack</option>
-                                <option value="Pickup">Pickup</option>
-                                <option value="Stranded">Stranded</option>
-                                <option value="Open Space">Open Space</option>
-                                <option value="Planet Surface">Planet Surface</option>
-                                <option value="PVP Zone">PVP Zone</option>
-                                <option value="Other">Other</option>
-                            </select>
-                            <input type="text" id="aar-location-type-other" placeholder="Specify location type..." class="mt-2 w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 hidden">
-                        </div>
+            <!-- AAR TAB -->
+            <div id="content-aar" class="tab-content hidden">
+                <div class="mb-6 rounded-lg border border-gray-700 bg-mrs-box p-5 shadow-lg md:p-6">
+                    <h2 class="mb-4 font-mohave text-2xl font-semibold uppercase tracking-wide text-white">After Action Report</h2>
 
-                        <!-- Specific POI -->
-                        <div class="md:col-span-2">
-                            <label class="mb-2 block text-sm font-medium text-gray-300">Specific POI</label>
-                            <div class="custom-select-wrapper relative" id="aar-poi-select">
-                                <div class="custom-select-trigger relative flex w-full cursor-pointer items-center justify-between rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition hover:border-primary-500">
-                                    <span class="custom-select-value truncate pr-4" id="aar-poi-value">Select POI...</span>
-                                    <svg class="custom-select-arrow absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                    </svg>
-                                </div>
-                                <div class="custom-select-dropdown absolute left-0 right-0 top-full z-50 mt-1 hidden overflow-hidden rounded-md border border-gray-600 bg-gray-700 shadow-lg">
-                                    <div class="border-b border-gray-600 bg-gray-800 p-2">
-                                        <input type="text" placeholder="Search POIs..." class="poi-search-input w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-1.5 text-sm text-gray-200 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                    <!-- SHIPS USED Section -->
+                    <div class="mb-6">
+                        <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Ships Used</h3>
+                        <div class="grid gap-4 md:grid-cols-2">
+                            <!-- Gunship -->
+                            <div>
+                                <label class="mb-2 block text-sm font-medium text-gray-300">Gunship</label>
+                                <div class="custom-select-wrapper relative" id="aar-gunship-select">
+                                    <div
+                                        class="custom-select-trigger relative flex w-full cursor-pointer items-center justify-between rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition hover:border-primary-500"
+                                    >
+                                        <span class="custom-select-value truncate pr-4" id="aar-gunship-value">Select ship...</span>
+                                        <svg
+                                            class="custom-select-arrow absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 transition-transform duration-200"
+                                            viewBox="0 0 20 20"
+                                            fill="currentColor"
+                                        >
+                                            <path
+                                                fill-rule="evenodd"
+                                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                                clip-rule="evenodd"
+                                            />
+                                        </svg>
                                     </div>
-                                    <div class="custom-select-options custom-scrollbar max-h-60 overflow-y-auto" id="aar-poi-options">
-                                        <div class="px-3 py-2 text-sm text-gray-400">Select a planetary body first</div>
+                                    <div
+                                        class="custom-select-dropdown absolute left-0 right-0 top-full z-50 mt-1 hidden overflow-hidden rounded-md border border-gray-600 bg-gray-700 shadow-lg"
+                                    >
+                                        <div class="border-b border-gray-600 bg-gray-800 p-2">
+                                            <input
+                                                type="text"
+                                                placeholder="Search ships..."
+                                                class="aar-ship-search-input w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-1.5 text-sm text-gray-200 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                            />
+                                        </div>
+                                        <div
+                                            class="custom-select-options custom-scrollbar max-h-60 overflow-y-auto"
+                                            id="aar-gunship-options"
+                                        ></div>
                                     </div>
                                 </div>
                             </div>
-                            <input type="text" id="aar-poi-other" placeholder="Specify POI..." class="mt-2 w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 hidden">
-                        </div>
-                    </div>
-                </div>
 
-                <!-- TIMESTAMPS Section -->
-                <div class="mb-6">
-                    <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Timestamps (minutes)</h3>
-                    <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
-                        <div>
-                            <label class="mb-2 block text-sm font-medium text-gray-300">Alert</label>
-                            <input type="text" id="aar-alert" value="00" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                        </div>
-                        <div>
-                            <label class="mb-2 block text-sm font-medium text-gray-300">Depart</label>
-                            <input type="text" id="aar-depart" placeholder="5" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                        </div>
-                        <div>
-                            <label class="mb-2 block text-sm font-medium text-gray-300">Client</label>
-                            <input type="text" id="aar-client" placeholder="15" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                        </div>
-                        <div>
-                            <label class="mb-2 block text-sm font-medium text-gray-300">RTB</label>
-                            <input type="text" id="aar-rtb" placeholder="25" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ENCOUNTERS Section -->
-                <div class="mb-6">
-                    <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Encounters</h3>
-                    <div class="grid gap-4 md:grid-cols-2">
-                        <div>
-                            <label class="mb-2 block text-sm font-medium text-gray-300">PVE</label>
-                            <input type="text" id="aar-pve" placeholder="e.g., NPCs (9Tails), Natural (Freezing Planet), None" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                        </div>
-                        <div>
-                            <label class="mb-2 block text-sm font-medium text-gray-300">PVP</label>
-                            <input type="text" id="aar-pvp" placeholder="e.g., Hostiles, Neutrals, None" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                        </div>
-                    </div>
-                    <div class="mt-4">
-                        <label class="mb-2 block text-sm font-medium text-gray-300">Actions Taken</label>
-                        <textarea id="aar-actions" rows="3" placeholder="Brief description of tactics and actions..." class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"></textarea>
-                    </div>
-                </div>
-
-                <!-- ISSUES Section -->
-                <div class="mb-6">
-                    <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Issues</h3>
-                    <div class="mb-4">
-                        <label class="mb-2 block text-sm font-medium text-gray-300">Problems</label>
-                        <div class="flex flex-wrap gap-2">
-                            <label class="flex items-center rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm transition hover:bg-gray-600">
-                                <input type="checkbox" value="Login" class="aar-issue-checkbox mr-2 h-4 w-4 rounded border-gray-600 bg-gray-700 text-mrs-button focus:ring-2 focus:ring-mrs-button">
-                                Login
-                            </label>
-                            <label class="flex items-center rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm transition hover:bg-gray-600">
-                                <input type="checkbox" value="Undocking" class="aar-issue-checkbox mr-2 h-4 w-4 rounded border-gray-600 bg-gray-700 text-mrs-button focus:ring-2 focus:ring-mrs-button">
-                                Undocking
-                            </label>
-                            <label class="flex items-center rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm transition hover:bg-gray-600">
-                                <input type="checkbox" value="Quantum Travel/Jumpgate" class="aar-issue-checkbox mr-2 h-4 w-4 rounded border-gray-600 bg-gray-700 text-mrs-button focus:ring-2 focus:ring-mrs-button">
-                                Quantum Travel/Jumpgate
-                            </label>
-                            <label class="flex items-center rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm transition hover:bg-gray-600">
-                                <input type="checkbox" value="30K" class="aar-issue-checkbox mr-2 h-4 w-4 rounded border-gray-600 bg-gray-700 text-mrs-button focus:ring-2 focus:ring-mrs-button">
-                                30K
-                            </label>
-                            <label class="flex items-center rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm transition hover:bg-gray-600">
-                                <input type="checkbox" value="Desync" class="aar-issue-checkbox mr-2 h-4 w-4 rounded border-gray-600 bg-gray-700 text-mrs-button focus:ring-2 focus:ring-mrs-button">
-                                Desync
-                            </label>
-                            <label class="flex items-center rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm transition hover:bg-gray-600">
-                                <input type="checkbox" value="Elevators" class="aar-issue-checkbox mr-2 h-4 w-4 rounded border-gray-600 bg-gray-700 text-mrs-button focus:ring-2 focus:ring-mrs-button">
-                                Elevators
-                            </label>
-                            <input type="text" id="aar-other-issues" placeholder="Other issues..." class="rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="mb-2 block text-sm font-medium text-gray-300">Brief Fix</label>
-                        <textarea id="aar-fix" rows="2" placeholder="Describe how issues were resolved..." class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"></textarea>
-                    </div>
-                </div>
-
-                <!-- SUMMARY Section -->
-                <div class="mb-6">
-                    <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Summary</h3>
-                    <textarea id="aar-summary" rows="4" placeholder="Short alert description..." class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"></textarea>
-                </div>
-
-                <!-- RESULT Section -->
-                <div class="mb-6">
-                    <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Result</h3>
-                    <div class="mb-4">
-                        <label class="mb-2 block text-sm font-medium text-gray-300">Mission Outcome</label>
-                        <select id="aar-outcome" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                            <option value="">Select...</option>
-                            <option value="Success">Success</option>
-                            <option value="Failed">Failed</option>
-                            <option value="Aborted">Aborted</option>
-                            <option value="No Contact">No Contact</option>
-                            <option value="Refused">Refused</option>
-                            <option value="Game Error">Game Error</option>
-                            <option value="Canceled">Canceled</option>
-                        </select>
-                    </div>
-                    <div class="grid gap-4 md:grid-cols-2">
-                        <div id="aar-extracted-container" class="hidden">
-                            <label class="mb-2 block text-sm font-medium text-gray-300">Client Extracted To</label>
-                            <div class="custom-select-wrapper relative" id="aar-extracted-select">
-                                <div class="custom-select-trigger relative flex w-full cursor-pointer items-center justify-between rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition hover:border-primary-500">
-                                    <span class="custom-select-value truncate pr-4" id="aar-extracted-value">Select...</span>
-                                    <svg class="custom-select-arrow absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                    </svg>
-                                </div>
-                                <div class="custom-select-dropdown absolute left-0 right-0 top-full z-50 mt-1 hidden overflow-hidden rounded-md border border-gray-600 bg-gray-700 shadow-lg">
-                                    <div class="border-b border-gray-600 bg-gray-800 p-2">
-                                        <input type="text" placeholder="Search stations..." class="extracted-search-input w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-1.5 text-sm text-gray-200 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                            <!-- Medical -->
+                            <div>
+                                <label class="mb-2 block text-sm font-medium text-gray-300">Medical</label>
+                                <div class="custom-select-wrapper relative" id="aar-medical-select">
+                                    <div
+                                        class="custom-select-trigger relative flex w-full cursor-pointer items-center justify-between rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition hover:border-primary-500"
+                                    >
+                                        <span class="custom-select-value truncate pr-4" id="aar-medical-value">Select ship...</span>
+                                        <svg
+                                            class="custom-select-arrow absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 transition-transform duration-200"
+                                            viewBox="0 0 20 20"
+                                            fill="currentColor"
+                                        >
+                                            <path
+                                                fill-rule="evenodd"
+                                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                                clip-rule="evenodd"
+                                            />
+                                        </svg>
                                     </div>
-                                    <div class="custom-select-options custom-scrollbar max-h-60 overflow-y-auto" id="aar-extracted-options">
-                                        <!-- Will be populated by JavaScript -->
+                                    <div
+                                        class="custom-select-dropdown absolute left-0 right-0 top-full z-50 mt-1 hidden overflow-hidden rounded-md border border-gray-600 bg-gray-700 shadow-lg"
+                                    >
+                                        <div class="border-b border-gray-600 bg-gray-800 p-2">
+                                            <input
+                                                type="text"
+                                                placeholder="Search ships..."
+                                                class="aar-ship-search-input w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-1.5 text-sm text-gray-200 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                            />
+                                        </div>
+                                        <div
+                                            class="custom-select-options custom-scrollbar max-h-60 overflow-y-auto"
+                                            id="aar-medical-options"
+                                        ></div>
                                     </div>
                                 </div>
                             </div>
-                            <input type="text" id="aar-extracted-other" placeholder="Specify location..." class="mt-2 w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 hidden">
+
+                            <!-- CAP -->
+                            <div>
+                                <label class="mb-2 block text-sm font-medium text-gray-300"
+                                    >CAP Ships <span class="text-xs text-gray-400">(comma-separated if multiple)</span></label
+                                >
+                                <input
+                                    type="text"
+                                    id="aar-cap-ships"
+                                    placeholder="e.g., Anvil Hornet, Aegis Sabre"
+                                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                />
+                            </div>
+
+                            <!-- Additional Ships -->
+                            <div>
+                                <label class="mb-2 block text-sm font-medium text-gray-300">Additional Ships</label>
+                                <input
+                                    type="text"
+                                    id="aar-additional-ships"
+                                    placeholder="List additional ships..."
+                                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                />
+                            </div>
+                        </div>
+
+                        <!-- Reason -->
+                        <div class="mt-4">
+                            <label class="mb-2 block text-sm font-medium text-gray-300">Reason</label>
+                            <input
+                                type="text"
+                                id="aar-reason"
+                                placeholder="e.g., Effectiveness, Required for Situation, Availability..."
+                                class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- INTERSYSTEM RESPONSE Section -->
+                    <div class="mb-6">
+                        <label class="mb-2 flex items-center text-sm font-medium text-gray-400">
+                            <input
+                                type="checkbox"
+                                id="aar-intersystem-toggle"
+                                class="mr-2 h-4 w-4 rounded border-gray-600 bg-gray-700 text-mrs-button focus:ring-2 focus:ring-mrs-button"
+                            />
+                            Intersystem Response
+                        </label>
+                    </div>
+
+                    <!-- LOCATION Section -->
+                    <div class="mb-6">
+                        <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Location</h3>
+                        <div class="grid gap-4 md:grid-cols-2">
+                            <!-- Planetary Body -->
+                            <div>
+                                <label class="mb-2 block text-sm font-medium text-gray-300">Planetary Body</label>
+                                <div class="custom-select-wrapper relative" id="aar-planet-select">
+                                    <div
+                                        class="custom-select-trigger relative flex w-full cursor-pointer items-center justify-between rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition hover:border-primary-500"
+                                    >
+                                        <span class="custom-select-value truncate pr-4" id="aar-planet-value"
+                                            >Select planetary body...</span
+                                        >
+                                        <svg
+                                            class="custom-select-arrow absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 transition-transform duration-200"
+                                            viewBox="0 0 20 20"
+                                            fill="currentColor"
+                                        >
+                                            <path
+                                                fill-rule="evenodd"
+                                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                                clip-rule="evenodd"
+                                            />
+                                        </svg>
+                                    </div>
+                                    <div
+                                        class="custom-select-dropdown absolute left-0 right-0 top-full z-50 mt-1 hidden overflow-hidden rounded-md border border-gray-600 bg-gray-700 shadow-lg"
+                                    >
+                                        <div class="border-b border-gray-600 bg-gray-800 p-2">
+                                            <input
+                                                type="text"
+                                                placeholder="Search locations..."
+                                                class="planet-search-input w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-1.5 text-sm text-gray-200 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                            />
+                                        </div>
+                                        <div
+                                            class="custom-select-options custom-scrollbar max-h-60 overflow-y-auto"
+                                            id="aar-planet-options"
+                                        ></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Location Type -->
+                            <div>
+                                <label class="mb-2 block text-sm font-medium text-gray-300">Location Type</label>
+                                <select
+                                    id="aar-location-type"
+                                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                >
+                                    <option value="">Select type...</option>
+                                    <option value="Landing Zone / City">Landing Zone / City</option>
+                                    <option value="Settlement">Settlement</option>
+                                    <option value="Outpost">Outpost</option>
+                                    <option value="Space Station">Space Station</option>
+                                    <option value="Lagrange Station">Lagrange Station</option>
+                                    <option value="Jump Point Station">Jump Point Station</option>
+                                    <option value="Bunker (Corporate)">Bunker (Corporate)</option>
+                                    <option value="Bunker (Outlaw)">Bunker (Outlaw)</option>
+                                    <option value="Bunker (Abandoned)">Bunker (Abandoned)</option>
+                                    <option value="Security Post">Security Post</option>
+                                    <option value="Mining Facility">Mining Facility</option>
+                                    <option value="Processing Facility">Processing Facility</option>
+                                    <option value="Distribution Center">Distribution Center</option>
+                                    <option value="Data Center">Data Center</option>
+                                    <option value="Research Outpost">Research Outpost</option>
+                                    <option value="Agricultural / Farm">Agricultural / Farm</option>
+                                    <option value="Aid Shelter">Aid Shelter</option>
+                                    <option value="Salvage Yard">Salvage Yard</option>
+                                    <option value="Cave System">Cave System</option>
+                                    <option value="Derelict / Wreck">Derelict / Wreck</option>
+                                    <option value="Communication Array">Communication Array</option>
+                                    <option value="Prison / Rehabilitation">Prison / Rehabilitation</option>
+                                    <option value="Racetrack">Racetrack</option>
+                                    <option value="Pickup">Pickup</option>
+                                    <option value="Stranded">Stranded</option>
+                                    <option value="Open Space">Open Space</option>
+                                    <option value="Planet Surface">Planet Surface</option>
+                                    <option value="PVP Zone">PVP Zone</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <input
+                                    type="text"
+                                    id="aar-location-type-other"
+                                    placeholder="Specify location type..."
+                                    class="mt-2 w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 hidden"
+                                />
+                            </div>
+
+                            <!-- Specific POI -->
+                            <div class="md:col-span-2">
+                                <label class="mb-2 block text-sm font-medium text-gray-300">Specific POI</label>
+                                <div class="custom-select-wrapper relative" id="aar-poi-select">
+                                    <div
+                                        class="custom-select-trigger relative flex w-full cursor-pointer items-center justify-between rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition hover:border-primary-500"
+                                    >
+                                        <span class="custom-select-value truncate pr-4" id="aar-poi-value">Select POI...</span>
+                                        <svg
+                                            class="custom-select-arrow absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 transition-transform duration-200"
+                                            viewBox="0 0 20 20"
+                                            fill="currentColor"
+                                        >
+                                            <path
+                                                fill-rule="evenodd"
+                                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                                clip-rule="evenodd"
+                                            />
+                                        </svg>
+                                    </div>
+                                    <div
+                                        class="custom-select-dropdown absolute left-0 right-0 top-full z-50 mt-1 hidden overflow-hidden rounded-md border border-gray-600 bg-gray-700 shadow-lg"
+                                    >
+                                        <div class="border-b border-gray-600 bg-gray-800 p-2">
+                                            <input
+                                                type="text"
+                                                placeholder="Search POIs..."
+                                                class="poi-search-input w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-1.5 text-sm text-gray-200 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                            />
+                                        </div>
+                                        <div class="custom-select-options custom-scrollbar max-h-60 overflow-y-auto" id="aar-poi-options">
+                                            <div class="px-3 py-2 text-sm text-gray-400">Select a planetary body first</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <input
+                                    type="text"
+                                    id="aar-poi-other"
+                                    placeholder="Specify POI..."
+                                    class="mt-2 w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 hidden"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TIMESTAMPS Section -->
+                    <div class="mb-6">
+                        <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Timestamps (minutes)</h3>
+                        <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
+                            <div>
+                                <label class="mb-2 block text-sm font-medium text-gray-300">Alert</label>
+                                <input
+                                    type="text"
+                                    id="aar-alert"
+                                    value="00"
+                                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                />
+                            </div>
+                            <div>
+                                <label class="mb-2 block text-sm font-medium text-gray-300">Depart</label>
+                                <input
+                                    type="text"
+                                    id="aar-depart"
+                                    placeholder="5"
+                                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                />
+                            </div>
+                            <div>
+                                <label class="mb-2 block text-sm font-medium text-gray-300">Client</label>
+                                <input
+                                    type="text"
+                                    id="aar-client"
+                                    placeholder="15"
+                                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                />
+                            </div>
+                            <div>
+                                <label class="mb-2 block text-sm font-medium text-gray-300">RTB</label>
+                                <input
+                                    type="text"
+                                    id="aar-rtb"
+                                    placeholder="25"
+                                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ENCOUNTERS Section -->
+                    <div class="mb-6">
+                        <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Encounters</h3>
+                        <div class="grid gap-4 md:grid-cols-2">
+                            <div>
+                                <label class="mb-2 block text-sm font-medium text-gray-300">PVE</label>
+                                <input
+                                    type="text"
+                                    id="aar-pve"
+                                    placeholder="e.g., NPCs (9Tails), Natural (Freezing Planet), None"
+                                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                />
+                            </div>
+                            <div>
+                                <label class="mb-2 block text-sm font-medium text-gray-300">PVP</label>
+                                <input
+                                    type="text"
+                                    id="aar-pvp"
+                                    placeholder="e.g., Hostiles, Neutrals, None"
+                                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                />
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <label class="mb-2 block text-sm font-medium text-gray-300">Actions Taken</label>
+                            <textarea
+                                id="aar-actions"
+                                rows="3"
+                                placeholder="Brief description of tactics and actions..."
+                                class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                            ></textarea>
+                        </div>
+                    </div>
+
+                    <!-- ISSUES Section -->
+                    <div class="mb-6">
+                        <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Issues</h3>
+                        <div class="mb-4">
+                            <label class="mb-2 block text-sm font-medium text-gray-300">Problems</label>
+                            <div class="flex flex-wrap gap-2">
+                                <label
+                                    class="flex items-center rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm transition hover:bg-gray-600"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        value="Login"
+                                        class="aar-issue-checkbox mr-2 h-4 w-4 rounded border-gray-600 bg-gray-700 text-mrs-button focus:ring-2 focus:ring-mrs-button"
+                                    />
+                                    Login
+                                </label>
+                                <label
+                                    class="flex items-center rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm transition hover:bg-gray-600"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        value="Undocking"
+                                        class="aar-issue-checkbox mr-2 h-4 w-4 rounded border-gray-600 bg-gray-700 text-mrs-button focus:ring-2 focus:ring-mrs-button"
+                                    />
+                                    Undocking
+                                </label>
+                                <label
+                                    class="flex items-center rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm transition hover:bg-gray-600"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        value="Quantum Travel/Jumpgate"
+                                        class="aar-issue-checkbox mr-2 h-4 w-4 rounded border-gray-600 bg-gray-700 text-mrs-button focus:ring-2 focus:ring-mrs-button"
+                                    />
+                                    Quantum Travel/Jumpgate
+                                </label>
+                                <label
+                                    class="flex items-center rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm transition hover:bg-gray-600"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        value="30K"
+                                        class="aar-issue-checkbox mr-2 h-4 w-4 rounded border-gray-600 bg-gray-700 text-mrs-button focus:ring-2 focus:ring-mrs-button"
+                                    />
+                                    30K
+                                </label>
+                                <label
+                                    class="flex items-center rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm transition hover:bg-gray-600"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        value="Desync"
+                                        class="aar-issue-checkbox mr-2 h-4 w-4 rounded border-gray-600 bg-gray-700 text-mrs-button focus:ring-2 focus:ring-mrs-button"
+                                    />
+                                    Desync
+                                </label>
+                                <label
+                                    class="flex items-center rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm transition hover:bg-gray-600"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        value="Elevators"
+                                        class="aar-issue-checkbox mr-2 h-4 w-4 rounded border-gray-600 bg-gray-700 text-mrs-button focus:ring-2 focus:ring-mrs-button"
+                                    />
+                                    Elevators
+                                </label>
+                                <input
+                                    type="text"
+                                    id="aar-other-issues"
+                                    placeholder="Other issues..."
+                                    class="rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                />
+                            </div>
                         </div>
                         <div>
-                            <label class="mb-2 block text-sm font-medium text-gray-300">Challenges</label>
-                            <select id="aar-challenges" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                            <label class="mb-2 block text-sm font-medium text-gray-300">Brief Fix</label>
+                            <textarea
+                                id="aar-fix"
+                                rows="2"
+                                placeholder="Describe how issues were resolved..."
+                                class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                            ></textarea>
+                        </div>
+                    </div>
+
+                    <!-- SUMMARY Section -->
+                    <div class="mb-6">
+                        <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Summary</h3>
+                        <textarea
+                            id="aar-summary"
+                            rows="4"
+                            placeholder="Short alert description..."
+                            class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                        ></textarea>
+                    </div>
+
+                    <!-- RESULT Section -->
+                    <div class="mb-6">
+                        <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Result</h3>
+                        <div class="mb-4">
+                            <label class="mb-2 block text-sm font-medium text-gray-300">Mission Outcome</label>
+                            <select
+                                id="aar-outcome"
+                                class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                            >
                                 <option value="">Select...</option>
-                                <option value="Abnormal Events">Abnormal Events (e.g., PvP, Hostage)</option>
-                                <option value="Routine">Routine (e.g., Standard Bunker Rescue)</option>
-                                <option value="Other">Other</option>
-                                <option value="None">None</option>
+                                <option value="Success">Success</option>
+                                <option value="Failed">Failed</option>
+                                <option value="Aborted">Aborted</option>
+                                <option value="No Contact">No Contact</option>
+                                <option value="Refused">Refused</option>
+                                <option value="Game Error">Game Error</option>
+                                <option value="Canceled">Canceled</option>
                             </select>
-                            <input type="text" id="aar-challenges-other" placeholder="Specify challenges..." class="mt-2 w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 hidden">
+                        </div>
+                        <div class="grid gap-4 md:grid-cols-2">
+                            <div id="aar-extracted-container" class="hidden">
+                                <label class="mb-2 block text-sm font-medium text-gray-300">Client Extracted To</label>
+                                <div class="custom-select-wrapper relative" id="aar-extracted-select">
+                                    <div
+                                        class="custom-select-trigger relative flex w-full cursor-pointer items-center justify-between rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition hover:border-primary-500"
+                                    >
+                                        <span class="custom-select-value truncate pr-4" id="aar-extracted-value">Select...</span>
+                                        <svg
+                                            class="custom-select-arrow absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 transition-transform duration-200"
+                                            viewBox="0 0 20 20"
+                                            fill="currentColor"
+                                        >
+                                            <path
+                                                fill-rule="evenodd"
+                                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                                clip-rule="evenodd"
+                                            />
+                                        </svg>
+                                    </div>
+                                    <div
+                                        class="custom-select-dropdown absolute left-0 right-0 top-full z-50 mt-1 hidden overflow-hidden rounded-md border border-gray-600 bg-gray-700 shadow-lg"
+                                    >
+                                        <div class="border-b border-gray-600 bg-gray-800 p-2">
+                                            <input
+                                                type="text"
+                                                placeholder="Search stations..."
+                                                class="extracted-search-input w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-1.5 text-sm text-gray-200 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                            />
+                                        </div>
+                                        <div
+                                            class="custom-select-options custom-scrollbar max-h-60 overflow-y-auto"
+                                            id="aar-extracted-options"
+                                        >
+                                            <!-- Will be populated by JavaScript -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <input
+                                    type="text"
+                                    id="aar-extracted-other"
+                                    placeholder="Specify location..."
+                                    class="mt-2 w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 hidden"
+                                />
+                            </div>
+                            <div>
+                                <label class="mb-2 block text-sm font-medium text-gray-300">Challenges</label>
+                                <select
+                                    id="aar-challenges"
+                                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                >
+                                    <option value="">Select...</option>
+                                    <option value="Abnormal Events">Abnormal Events (e.g., PvP, Hostage)</option>
+                                    <option value="Routine">Routine (e.g., Standard Bunker Rescue)</option>
+                                    <option value="Other">Other</option>
+                                    <option value="None">None</option>
+                                </select>
+                                <input
+                                    type="text"
+                                    id="aar-challenges-other"
+                                    placeholder="Specify challenges..."
+                                    class="mt-2 w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 hidden"
+                                />
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <label class="mb-2 block text-sm font-medium text-gray-300">Failure/Abort Reason (if applicable)</label>
+                            <input
+                                type="text"
+                                id="aar-failure"
+                                placeholder="Describe reason for failure or abort..."
+                                class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                            />
                         </div>
                     </div>
-                    <div class="mt-4">
-                        <label class="mb-2 block text-sm font-medium text-gray-300">Failure/Abort Reason (if applicable)</label>
-                        <input type="text" id="aar-failure" placeholder="Describe reason for failure or abort..." class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                    </div>
-                </div>
 
-                <!-- NOTES Section -->
-                <div class="mb-6">
-                    <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Notes</h3>
-                    <textarea id="aar-notes" rows="4" placeholder="Any additional notes..." class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"></textarea>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="flex gap-3">
-                    <button onclick="generateAARPreview()" class="flex-1 rounded-lg border border-mrs-button bg-mrs-button px-6 py-3 font-semibold text-white shadow-md transition hover:border-mrs-button-hover hover:bg-mrs-button-hover">
-                        Generate Preview
-                    </button>
-                    <button onclick="clearAAR()" class="rounded-lg border border-gray-600 bg-gray-700 px-6 py-3 font-semibold text-white transition hover:bg-gray-600">
-                        Clear Form
-                    </button>
-                </div>
-            </div>
-
-            <!-- AAR Preview Card -->
-            <div class="rounded-lg border border-gray-700 bg-mrs-box p-5 shadow-lg md:p-6">
-                <h2 class="mb-4 font-mohave text-2xl font-semibold uppercase tracking-wide text-white">AAR Preview</h2>
-                <div id="aar-preview" class="max-h-96 min-h-[100px] overflow-y-auto rounded-lg border border-gray-700 bg-gray-900 p-4 font-mono text-sm text-gray-300 whitespace-pre-wrap md:p-6">Generate AAR to see preview...</div>
-                <button class="mt-5 w-full rounded-lg border border-mrs-button bg-mrs-button px-8 py-4 text-lg font-semibold text-white shadow-lg transition hover:border-mrs-button-hover hover:bg-mrs-button-hover" onclick="copyAARToClipboard()">COPY AAR TO CLIPBOARD</button>
-                <!-- Success Message -->
-                <div id="aar-successMessage" class="hidden">
-                    <div class="mt-3 rounded-lg bg-green-600 px-4 py-3 text-center font-medium text-white">
-                        ✅ Copied to clipboard!
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- END AAR TAB -->
-
-        <!-- TIP SPLITTER TAB -->
-        <div id="content-tipSplitter" class="tab-content hidden">
-            <div class="mb-6 rounded-lg border border-gray-700 bg-mrs-box p-5 shadow-lg md:p-6">
-                <h2 class="mb-4 font-mohave text-2xl font-semibold uppercase tracking-wide text-white">Tip Splitter Calculator</h2>
-                <p class="mb-4 rounded-lg border border-blue-900 bg-blue-950/50 p-3 text-sm text-gray-300">
-                    💡 <strong class="text-white">Calculate tip distributions</strong> accounting for the 0.5% transaction fee on each transfer. The calculator ensures the team lead doesn't lose money by including the fee in each transfer amount.
-                </p>
-
-                <!-- Input Section -->
-                <div class="mb-6">
-                    <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Tip Details</h3>
-                    <div class="grid gap-4 md:grid-cols-2">
-                        <div>
-                            <label class="mb-2 block text-sm font-medium text-gray-300">Total Tip Amount (aUEC)</label>
-                            <input type="number" id="tip-total" placeholder="100000" min="0" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                        </div>
-                        <div>
-                            <label class="mb-2 block text-sm font-medium text-gray-300">
-                                Number of Crew Members
-                                <span class="text-xs font-normal text-gray-400">(excluding Team Lead)</span>
-                            </label>
-                            <input type="number" id="tip-recipients" placeholder="5" min="1" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                            <p class="mt-1 text-xs text-gray-400">Enter the number of crew members who should receive tips (don't count yourself as Team Lead)</p>
-                        </div>
+                    <!-- NOTES Section -->
+                    <div class="mb-6">
+                        <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Notes</h3>
+                        <textarea
+                            id="aar-notes"
+                            rows="4"
+                            placeholder="Any additional notes..."
+                            class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                        ></textarea>
                     </div>
 
-                    <!-- Lead Choice Option -->
-                    <div class="mt-4">
-                        <label class="mb-2 block text-sm font-medium text-gray-300">Your (Team Lead) Choice</label>
-                        <select id="tip-lead-choice" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                            <option value="lead-keep">Keep Tip</option>
-                            <option value="lead-decline">Don't Want Tip (Redistribute)</option>
-                            <option value="lead-logistics">Donate to Logistics</option>
-                        </select>
-                        <p class="mt-1 text-xs text-gray-400">Choose what happens to your share. Keep = you get an equal share with no fee. Redistribute = your share goes to crew keeping tips. Logistics = your share goes to logistics pool.</p>
-                    </div>
-
-                    <!-- Option: Import from Ship Assignments -->
-                    <div class="mt-4">
-                        <button onclick="importCrewForTip()" class="rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600">
-                            Import Crew Count from Ship Assignments
+                    <!-- Action Buttons -->
+                    <div class="flex gap-3">
+                        <button
+                            onclick="generateAARPreview()"
+                            class="flex-1 rounded-lg border border-mrs-button bg-mrs-button px-6 py-3 font-semibold text-white shadow-md transition hover:border-mrs-button-hover hover:bg-mrs-button-hover"
+                        >
+                            Generate Preview
+                        </button>
+                        <button
+                            onclick="clearAAR()"
+                            class="rounded-lg border border-gray-600 bg-gray-700 px-6 py-3 font-semibold text-white transition hover:bg-gray-600"
+                        >
+                            Clear Form
                         </button>
                     </div>
                 </div>
 
-                <!-- Recipient Management -->
-                <div class="mb-6">
-                    <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Crew Recipients</h3>
-                    <p class="mb-3 text-sm text-gray-400">
-                        Each crew member (excluding Team Lead) gets an equal share. Choose what happens to each share:
-                    </p>
-                    <div id="tip-recipients-list" class="mb-3 flex flex-col gap-2">
-                        <div class="px-3 py-2 text-sm text-gray-400">Add crew members by entering a number above or importing from ship assignments.</div>
+                <!-- AAR Preview Card -->
+                <div class="rounded-lg border border-gray-700 bg-mrs-box p-5 shadow-lg md:p-6">
+                    <h2 class="mb-4 font-mohave text-2xl font-semibold uppercase tracking-wide text-white">AAR Preview</h2>
+                    <div
+                        id="aar-preview"
+                        class="max-h-96 min-h-[100px] overflow-y-auto rounded-lg border border-gray-700 bg-gray-900 p-4 font-mono text-sm text-gray-300 whitespace-pre-wrap md:p-6"
+                    >
+                        Generate AAR to see preview...
                     </div>
-                </div>
-
-                <!-- Calculate Button -->
-                <div class="mb-6">
-                    <button onclick="calculateTipSplit()" class="w-full rounded-lg border border-mrs-button bg-mrs-button px-8 py-4 text-lg font-semibold text-white shadow-lg transition hover:border-mrs-button-hover hover:bg-mrs-button-hover">
-                        CALCULATE SPLITS
+                    <button
+                        class="mt-5 w-full rounded-lg border border-mrs-button bg-mrs-button px-8 py-4 text-lg font-semibold text-white shadow-lg transition hover:border-mrs-button-hover hover:bg-mrs-button-hover"
+                        onclick="copyAARToClipboard()"
+                    >
+                        COPY AAR TO CLIPBOARD
                     </button>
+                    <!-- Success Message -->
+                    <div id="aar-successMessage" class="hidden">
+                        <div class="mt-3 rounded-lg bg-green-600 px-4 py-3 text-center font-medium text-white">✅ Copied to clipboard!</div>
+                    </div>
                 </div>
+            </div>
+            <!-- END AAR TAB -->
 
-                <!-- Results Section -->
-                <div id="tip-results" class="hidden">
-                    <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Transfer Amounts</h3>
-                    <p class="mb-3 text-xs text-gray-400">Type the "Amount to SEND" in-game. They'll receive that exact amount. Star Citizen adds 0.5% fee on top of what you send.</p>
-                    <div class="mb-4 rounded-lg border border-gray-700 bg-gray-900 p-4">
-                        <div class="mb-3 grid grid-cols-3 gap-4 border-b border-gray-700 pb-2 text-sm font-semibold text-blue-300">
-                            <div>Recipient</div>
-                            <div class="text-right">Amount to SEND</div>
-                            <div class="text-right">They RECEIVE</div>
+            <!-- TIP SPLITTER TAB -->
+            <div id="content-tipSplitter" class="tab-content hidden">
+                <div class="mb-6 rounded-lg border border-gray-700 bg-mrs-box p-5 shadow-lg md:p-6">
+                    <h2 class="mb-4 font-mohave text-2xl font-semibold uppercase tracking-wide text-white">Tip Splitter Calculator</h2>
+                    <p class="mb-4 rounded-lg border border-blue-900 bg-blue-950/50 p-3 text-sm text-gray-300">
+                        💡 <strong class="text-white">Calculate tip distributions</strong> accounting for the 0.5% transaction fee on each
+                        transfer. The calculator ensures the team lead doesn't lose money by including the fee in each transfer amount.
+                    </p>
+
+                    <!-- Input Section -->
+                    <div class="mb-6">
+                        <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Tip Details</h3>
+                        <div class="grid gap-4 md:grid-cols-2">
+                            <div>
+                                <label class="mb-2 block text-sm font-medium text-gray-300">Total Tip Amount (aUEC)</label>
+                                <input
+                                    type="number"
+                                    id="tip-total"
+                                    placeholder="100000"
+                                    min="0"
+                                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                />
+                            </div>
+                            <div>
+                                <label class="mb-2 block text-sm font-medium text-gray-300">
+                                    Number of Crew Members
+                                    <span class="text-xs font-normal text-gray-400">(excluding Team Lead)</span>
+                                </label>
+                                <input
+                                    type="number"
+                                    id="tip-recipients"
+                                    placeholder="5"
+                                    min="1"
+                                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                />
+                                <p class="mt-1 text-xs text-gray-400">
+                                    Enter the number of crew members who should receive tips (don't count yourself as Team Lead)
+                                </p>
+                            </div>
                         </div>
-                        <div id="tip-results-list" class="flex flex-col gap-2"></div>
-                        <div id="tip-logistics-transfer" class="hidden mt-3 pt-3 border-t border-yellow-600"></div>
+
+                        <!-- Lead Choice Option -->
+                        <div class="mt-4">
+                            <label class="mb-2 block text-sm font-medium text-gray-300">Your (Team Lead) Choice</label>
+                            <select
+                                id="tip-lead-choice"
+                                class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                            >
+                                <option value="lead-keep">Keep Tip</option>
+                                <option value="lead-decline">Don't Want Tip (Redistribute)</option>
+                                <option value="lead-logistics">Donate to Logistics</option>
+                            </select>
+                            <p class="mt-1 text-xs text-gray-400">
+                                Choose what happens to your share. Keep = you get an equal share with no fee. Redistribute = your share goes
+                                to crew keeping tips. Logistics = your share goes to logistics pool.
+                            </p>
+                        </div>
+
+                        <!-- Option: Import from Ship Assignments -->
+                        <div class="mt-4">
+                            <button
+                                onclick="importCrewForTip()"
+                                class="rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600"
+                            >
+                                Import Crew Count from Ship Assignments
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="rounded-lg border border-green-900 bg-green-950/50 p-4">
-                        <div class="grid gap-2 text-sm">
-                            <div class="flex justify-between">
-                                <span class="text-gray-300">Total Tip:</span>
-                                <span class="font-semibold text-white" id="tip-summary-total">0 aUEC</span>
+                    <!-- Recipient Management -->
+                    <div class="mb-6">
+                        <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Crew Recipients</h3>
+                        <p class="mb-3 text-sm text-gray-400">
+                            Each crew member (excluding Team Lead) gets an equal share. Choose what happens to each share:
+                        </p>
+                        <div id="tip-recipients-list" class="mb-3 flex flex-col gap-2">
+                            <div class="px-3 py-2 text-sm text-gray-400">
+                                Add crew members by entering a number above or importing from ship assignments.
                             </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-300">Total Crew Members:</span>
-                                <span class="font-semibold text-white" id="tip-summary-crew-count">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Calculate Button -->
+                    <div class="mb-6">
+                        <button
+                            onclick="calculateTipSplit()"
+                            class="w-full rounded-lg border border-mrs-button bg-mrs-button px-8 py-4 text-lg font-semibold text-white shadow-lg transition hover:border-mrs-button-hover hover:bg-mrs-button-hover"
+                        >
+                            CALCULATE SPLITS
+                        </button>
+                    </div>
+
+                    <!-- Results Section -->
+                    <div id="tip-results" class="hidden">
+                        <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Transfer Amounts</h3>
+                        <p class="mb-3 text-xs text-gray-400">
+                            Type the "Amount to SEND" in-game. They'll receive that exact amount. Star Citizen adds 0.5% fee on top of what
+                            you send.
+                        </p>
+                        <div class="mb-4 rounded-lg border border-gray-700 bg-gray-900 p-4">
+                            <div class="mb-3 grid grid-cols-3 gap-4 border-b border-gray-700 pb-2 text-sm font-semibold text-blue-300">
+                                <div>Recipient</div>
+                                <div class="text-right">Amount to SEND</div>
+                                <div class="text-right">They RECEIVE</div>
                             </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-300">Share Per Crew Member:</span>
-                                <span class="font-semibold text-white" id="tip-summary-share">0 aUEC</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-300">Total Fees (0.5% per transfer):</span>
-                                <span class="font-semibold text-red-300" id="tip-summary-fees">0 aUEC</span>
-                            </div>
-                            <div id="tip-summary-logistics-section" class="hidden flex justify-between border-t border-yellow-800 pt-2">
-                                <span class="text-yellow-300">Logistics Pool:</span>
-                                <span class="text-lg font-bold text-yellow-300" id="tip-summary-logistics">0 aUEC</span>
-                            </div>
-                            <div class="flex justify-between border-t border-green-800 pt-2">
-                                <span class="text-gray-300">You Will Transfer:</span>
-                                <span class="text-lg font-bold text-white" id="tip-summary-transfer">0 aUEC</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-300">You Keep:</span>
-                                <span class="text-lg font-bold text-green-300" id="tip-summary-keep">0 aUEC</span>
+                            <div id="tip-results-list" class="flex flex-col gap-2"></div>
+                            <div id="tip-logistics-transfer" class="hidden mt-3 pt-3 border-t border-yellow-600"></div>
+                        </div>
+
+                        <div class="rounded-lg border border-green-900 bg-green-950/50 p-4">
+                            <div class="grid gap-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-300">Total Tip:</span>
+                                    <span class="font-semibold text-white" id="tip-summary-total">0 aUEC</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-300">Total Crew Members:</span>
+                                    <span class="font-semibold text-white" id="tip-summary-crew-count">0</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-300">Share Per Crew Member:</span>
+                                    <span class="font-semibold text-white" id="tip-summary-share">0 aUEC</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-300">Total Fees (0.5% per transfer):</span>
+                                    <span class="font-semibold text-red-300" id="tip-summary-fees">0 aUEC</span>
+                                </div>
+                                <div id="tip-summary-logistics-section" class="hidden flex justify-between border-t border-yellow-800 pt-2">
+                                    <span class="text-yellow-300">Logistics Pool:</span>
+                                    <span class="text-lg font-bold text-yellow-300" id="tip-summary-logistics">0 aUEC</span>
+                                </div>
+                                <div class="flex justify-between border-t border-green-800 pt-2">
+                                    <span class="text-gray-300">You Will Transfer:</span>
+                                    <span class="text-lg font-bold text-white" id="tip-summary-transfer">0 aUEC</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-300">You Keep:</span>
+                                    <span class="text-lg font-bold text-green-300" id="tip-summary-keep">0 aUEC</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <!-- END TIP SPLITTER TAB -->
         </div>
-        <!-- END TIP SPLITTER TAB -->
-    </div>
 
-
-    <!-- Application JavaScript Modules -->
-    <script src="js/constants.js"></script>
-    <script src="js/ships-api.js"></script>
-    <script src="js/ship-assignment.js"></script>
-    <script src="js/aar.js"></script>
-    <script src="js/tip-splitter.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/main.js"></script>
-</body>
+        <!-- Application JavaScript Modules -->
+        <script src="js/constants.js"></script>
+        <script src="js/ships-api.js"></script>
+        <script src="js/ship-assignment.js"></script>
+        <script src="js/aar.js"></script>
+        <script src="js/tip-splitter.js"></script>
+        <script src="js/ui.js"></script>
+        <script src="js/main.js"></script>
+    </body>
 </html>
